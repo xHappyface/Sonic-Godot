@@ -29,10 +29,10 @@ func _physics_process(delta: float) -> void:
 			if velocity.y < 0.0:
 				velocity.y = max(velocity.y, -4.0 * 60.0)
 		velocity.x = velocity.x + (move_direction.x * _AIR_ACCELERATION)
-		if (velocity.y < 0.0) and (velocity.y > (-4.0 * 60.0)):
-			velocity.x -= velocity.x * _AIR_DRAG * delta
+		if velocity.y == clamp(velocity.y, -4.0 * 60, 0.0):
+			velocity.x -= move_direction.x * _AIR_DRAG * delta
 	else:
-		#print(get_floor_angle())
+		rotation = get_floor_angle() * sign(get_floor_normal().x)
 		is_jumping = false
 		if Input.is_action_just_pressed("game_space"):
 			is_jumping = true
@@ -44,29 +44,43 @@ func _physics_process(delta: float) -> void:
 				velocity.x = min(velocity.x + _FRICTION, 0.0)
 		else:
 			if sign(move_direction.x) == sign(velocity.x) or sign(velocity.x) == 0.0:
-				if move_direction.x > 0.0:
-					velocity.x = min(velocity.x + _ACCELERATION, _TOP_SPEED)
-				else:
-					velocity.x = max(velocity.x - _ACCELERATION, -_TOP_SPEED)
+				velocity.x = clamp(velocity.x + (move_direction.x * _ACCELERATION), -_TOP_SPEED, _TOP_SPEED)
 			else:
 				velocity.x -= sign(velocity.x) * _DECELERATION
 	_handle_animations(move_direction, delta)
 	move_and_slide()
 
 func _handle_animations(move_direction: Vector2, delta: float) -> void:
+	print(velocity)
 	var temp_idling: float = min(idling + delta, _PATIENCE)
 	idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
 	  or (sign(move_direction.x) < 0.0 and not sprite.flip_h):
 		sprite.flip_h = not sprite.flip_h
 	if is_jumping:
-		if anim_player.current_animation != "roll":
-			anim_player.play("roll")
+		if anim_player.current_animation != "roll0" and abs(velocity.x) < _TOP_SPEED:
+			anim_player.play("roll0")
+		elif anim_player.current_animation != "roll1" and abs(velocity.x) >= _TOP_SPEED:
+			anim_player.play("roll1")
 	else:
-		if not is_on_floor() and velocity.y != 0.0:
-			anim_player.play("fall")
+		if not is_on_floor() and velocity.y >= _TOP_Y_SPEED / 2.0:
+			if not anim_player.current_animation == "fall":
+				anim_player.play("fall")
+		elif not is_on_floor() and velocity.y < _TOP_Y_SPEED / 2.0:
+			if velocity.x == 0.0 and not anim_player.current_animation == "idle":
+				anim_player.play("idle")
+			elif velocity.x != 0.0:
+				if abs(velocity.x) >= _TOP_SPEED * 0.67:
+					anim_player.play("run0_1")
+				else:
+					anim_player.play("run0")
 		elif is_on_floor() and velocity.x != 0.0:
-			if sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0:
+			if is_on_floor() and is_on_wall() and move_direction.x != 0.0:
+				if not anim_player.current_animation == "push_r" and not sprite.flip_h:
+					anim_player.play("push_r")
+				elif not anim_player.current_animation == "push_l" and sprite.flip_h:
+					anim_player.play("push_l")
+			elif sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0:
 				if abs(velocity.x) >= _TOP_SPEED:
 					anim_player.play("run1")
 				elif abs(velocity.x) >= _TOP_SPEED * 0.67:
