@@ -13,7 +13,9 @@ const _ACCELERATION: float = (12.0 / 256.0) * 60.0
 const _DECELERATION: float = 0.5 * 60.0
 const _FRICTION: float = _ACCELERATION
 const _TOP_SPEED: float = 6.0 * 60.0
+const _PATIENCE: float = 3.5
 
+var idling: float = 0.0
 var is_jumping: bool = false
 
 func _ready() -> void:
@@ -30,6 +32,7 @@ func _physics_process(delta: float) -> void:
 		if (velocity.y < 0.0) and (velocity.y > (-4.0 * 60.0)):
 			velocity.x -= velocity.x * _AIR_DRAG * delta
 	else:
+		#print(get_floor_angle())
 		is_jumping = false
 		if Input.is_action_just_pressed("game_space"):
 			is_jumping = true
@@ -47,10 +50,12 @@ func _physics_process(delta: float) -> void:
 					velocity.x = max(velocity.x - _ACCELERATION, -_TOP_SPEED)
 			else:
 				velocity.x -= sign(velocity.x) * _DECELERATION
-	_handle_animations(move_direction)
+	_handle_animations(move_direction, delta)
 	move_and_slide()
 
-func _handle_animations(move_direction: Vector2) -> void:
+func _handle_animations(move_direction: Vector2, delta: float) -> void:
+	var temp_idling: float = min(idling + delta, _PATIENCE)
+	idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
 	  or (sign(move_direction.x) < 0.0 and not sprite.flip_h):
 		sprite.flip_h = not sprite.flip_h
@@ -62,13 +67,28 @@ func _handle_animations(move_direction: Vector2) -> void:
 			anim_player.play("fall")
 		elif is_on_floor() and velocity.x != 0.0:
 			if sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0:
-				anim_player.play("run0")
+				if abs(velocity.x) >= _TOP_SPEED:
+					anim_player.play("run1")
+				elif abs(velocity.x) >= _TOP_SPEED * 0.67:
+					if anim_player.current_animation == "run0":
+						var frame: int = sprite.frame + 1
+						anim_player.play("run0_1")
+						anim_player.seek((frame - 12) * 0.05)
+					else:
+						anim_player.play("run0_1")
+				else:
+					anim_player.play("run0")
 			else:
-				anim_player.play("skid")
+				anim_player.play("brake")
 		elif is_on_floor() and move_direction.y != 0.0:
 			if move_direction.y > 0.0:
 				anim_player.play("look_up")
 			else:
 				anim_player.play("look_down")
-		elif anim_player.current_animation != "idle":
+		elif anim_player.current_animation != "idle" and temp_idling < _PATIENCE:
+			idling = temp_idling
 			anim_player.play("idle")
+		else:
+			idling = temp_idling
+			if idling >= _PATIENCE:
+				anim_player.play("bored")
