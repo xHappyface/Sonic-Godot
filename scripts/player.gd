@@ -15,35 +15,49 @@ const _DECELERATION: float = 0.5 * 60.0
 const _FRICTION: float = _ACCELERATION
 const _TOP_SPEED: float = 6.0 * 60.0
 const _PATIENCE: float = 3.0
+const _ROLL_FRICTION: float = _ACCELERATION / 2.0
+const _ROLL_DECELERATION: float = (32.0 / 256.0) * 60.0
 
-var idling: float = 0.0
-var is_jumping: bool = false
+var _control_lock: float = 0.0
+var _idling: float = 0.0
+var _is_jumping: bool = false
 
 func _ready() -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
+	_control_lock = max(_control_lock - delta, 0.0)
 	var move_direction: Vector2 = Input.get_vector("game_left", "game_right", "game_down", "game_up")
+	var real_input: Vector2 = move_direction
+	if _control_lock > 0.0:
+		move_direction.x = 0.0
+	if move_direction.x != 0.0:
+		move_direction.y = 0.0
 	if not is_on_floor():
 		velocity.y = min((velocity.y + _GRAVITY), _TOP_Y_SPEED)
-		if is_jumping and not Input.is_action_pressed("game_space"):
+		if _is_jumping and not Input.is_action_pressed("game_space"):
 			if velocity.y < 0.0:
 				velocity.y = max(velocity.y, -4.0 * 60.0)
 		velocity.x = velocity.x + (move_direction.x * _AIR_ACCELERATION)
 		if velocity.y == clamp(velocity.y, -4.0 * 60, 0.0):
 			velocity.x -= move_direction.x * _AIR_DRAG * delta
 	else:
-		is_jumping = false
+		_is_jumping = false
 		if Input.is_action_just_pressed("game_space"):
-			is_jumping = true
+			_is_jumping = true
 			velocity.y = max(velocity.y - _JUMP_FORCE, -_TOP_Y_SPEED)
-		if move_direction.x == 0.0:
+		if real_input.x == 0.0:
 			if sign(velocity.x) > 0.0:
 				velocity.x = max(velocity.x - _FRICTION, 0.0)
 			else:
 				velocity.x = min(velocity.x + _FRICTION, 0.0)
 		else:
-			if sign(move_direction.x) == sign(velocity.x) or sign(velocity.x) == 0.0:
+			if move_direction.y < 0.0:
+				if velocity.x > 0.0:
+					velocity.x = max(velocity.x - _ROLL_DECELERATION, 0.0)
+				elif velocity.x < 0.0:
+					velocity.x = min(velocity.x + _ROLL_DECELERATION, 0.0)
+			elif sign(move_direction.x) == sign(velocity.x) or sign(velocity.x) == 0.0:
 				velocity.x = clamp(velocity.x + (move_direction.x * _ACCELERATION), -_TOP_SPEED, _TOP_SPEED)
 			else:
 				velocity.x -= sign(velocity.x) * _DECELERATION
@@ -53,16 +67,13 @@ func _physics_process(delta: float) -> void:
 		rotation = get_floor_normal().angle() + deg_to_rad(90)
 
 func _handle_animations(move_direction: Vector2, delta: float) -> void:
-	var temp_idling: float = min(idling + delta, _PATIENCE * 60.0)
-	idling = 0.0
+	var temp_idling: float = min(_idling + delta, _PATIENCE * 60.0)
+	_idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
 	  or (sign(move_direction.x) < 0.0 and not sprite.flip_h):
 		sprite.flip_h = not sprite.flip_h
-	if is_jumping:
-		if anim_player.current_animation != "roll0" and abs(velocity.x) < _TOP_SPEED:
-			anim_player.play("roll0")
-		elif anim_player.current_animation != "roll1" and abs(velocity.x) >= _TOP_SPEED:
-			anim_player.play("roll1")
+	if _is_jumping:
+		_play_roll_animation()
 	else:
 		if not is_on_floor() and velocity.y >= _TOP_Y_SPEED / 2.0:
 			if not anim_player.current_animation == "fall":
@@ -81,6 +92,8 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 					anim_player.play("push_r")
 				elif not anim_player.current_animation == "push_l" and sprite.flip_h:
 					anim_player.play("push_l")
+			elif velocity.x != 0.0 and move_direction.y < 0.0:
+				_play_roll_animation()
 			elif sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0:
 				if abs(velocity.x) >= _TOP_SPEED:
 					anim_player.play("run1")
@@ -101,11 +114,17 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 			else:
 				anim_player.play("look_down")
 		elif anim_player.current_animation != "idle" and temp_idling < _PATIENCE:
-			idling = temp_idling
+			_idling = temp_idling
 			anim_player.play("idle")
 		else:
-			idling = temp_idling
-			if idling >= _PATIENCE and \
+			_idling = temp_idling
+			if _idling >= _PATIENCE and \
 			  (anim_player.current_animation != "bored0" and anim_player.current_animation != "bored1"):
 				anim_player.play("bored0")
 				anim_player.queue("bored1")
+
+func _play_roll_animation() -> void:
+	if anim_player.current_animation != "roll0" and abs(velocity.x) < _TOP_SPEED:
+		anim_player.play("roll0")
+	elif anim_player.current_animation != "roll1" and abs(velocity.x) >= _TOP_SPEED:
+		anim_player.play("roll1")
