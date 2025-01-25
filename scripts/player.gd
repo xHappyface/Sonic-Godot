@@ -53,10 +53,14 @@ func _physics_process(delta: float) -> void:
 				velocity.x = min(velocity.x + _FRICTION, 0.0)
 		else:
 			if move_direction.y < 0.0:
-				if velocity.x > 0.0:
+				if velocity.x > 0.0 and sign(move_direction.x) != sign(velocity.x):
 					velocity.x = max(velocity.x - _ROLL_DECELERATION, 0.0)
-				elif velocity.x < 0.0:
+				elif velocity.x < 0.0 and sign(move_direction.x) != sign(velocity.x):
 					velocity.x = min(velocity.x + _ROLL_DECELERATION, 0.0)
+				if velocity.x > 0.0:
+					velocity.x = max(velocity.x - _ROLL_FRICTION, 0.0)
+				elif velocity.x < 0.0:
+					velocity.x = min(velocity.x + _ROLL_FRICTION, 0.0)
 			elif sign(move_direction.x) == sign(velocity.x) or sign(velocity.x) == 0.0:
 				velocity.x = clamp(velocity.x + (move_direction.x * _ACCELERATION), -_TOP_SPEED, _TOP_SPEED)
 			else:
@@ -106,7 +110,7 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 						anim_player.play("run0_1")
 				else:
 					anim_player.play("run0")
-			else:
+			elif anim_player.current_animation != "roll0" or anim_player.current_animation != "roll1":
 				anim_player.play("brake")
 		elif is_on_floor() and move_direction.y != 0.0:
 			if move_direction.y > 0.0:
