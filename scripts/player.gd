@@ -3,6 +3,7 @@ class_name Player
 
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var game_origin: Node2D = $GameOrigin
 
 const _GRAVITY: float = (96.0 / 256.0) * 60.0
 const _AIR_ACCELERATION: float = (24.0 / 256.0) * 60.0
@@ -13,7 +14,7 @@ const _ACCELERATION: float = (12.0 / 256.0) * 60.0
 const _DECELERATION: float = 0.5 * 60.0
 const _FRICTION: float = _ACCELERATION
 const _TOP_SPEED: float = 6.0 * 60.0
-const _PATIENCE: float = 3.5
+const _PATIENCE: float = 3.0
 
 var idling: float = 0.0
 var is_jumping: bool = false
@@ -52,7 +53,7 @@ func _physics_process(delta: float) -> void:
 		rotation = get_floor_normal().angle() + deg_to_rad(90)
 
 func _handle_animations(move_direction: Vector2, delta: float) -> void:
-	var temp_idling: float = min(idling + delta, _PATIENCE)
+	var temp_idling: float = min(idling + delta, _PATIENCE * 60.0)
 	idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
 	  or (sign(move_direction.x) < 0.0 and not sprite.flip_h):
@@ -104,5 +105,7 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 			anim_player.play("idle")
 		else:
 			idling = temp_idling
-			if idling >= _PATIENCE:
-				anim_player.play("bored")
+			if idling >= _PATIENCE and \
+			  (anim_player.current_animation != "bored0" and anim_player.current_animation != "bored1"):
+				anim_player.play("bored0")
+				anim_player.queue("bored1")
