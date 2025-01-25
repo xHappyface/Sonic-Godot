@@ -32,7 +32,6 @@ func _physics_process(delta: float) -> void:
 		if velocity.y == clamp(velocity.y, -4.0 * 60, 0.0):
 			velocity.x -= move_direction.x * _AIR_DRAG * delta
 	else:
-		rotation = get_floor_angle() * sign(get_floor_normal().x)
 		is_jumping = false
 		if Input.is_action_just_pressed("game_space"):
 			is_jumping = true
@@ -49,9 +48,10 @@ func _physics_process(delta: float) -> void:
 				velocity.x -= sign(velocity.x) * _DECELERATION
 	_handle_animations(move_direction, delta)
 	move_and_slide()
+	if is_on_floor():
+		rotation = get_floor_normal().angle() + deg_to_rad(90)
 
 func _handle_animations(move_direction: Vector2, delta: float) -> void:
-	print(velocity)
 	var temp_idling: float = min(idling + delta, _PATIENCE)
 	idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
