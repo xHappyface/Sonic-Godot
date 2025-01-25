@@ -10,7 +10,7 @@ func _ready() -> void:
 	_follow_area = get_child(0).shape.get_rect()
 
 func _physics_process(_delta: float) -> void:
-	var player_position: Vector2 = _player.game_origin.global_position
+	var player_position: Vector2 = _player.global_position
 	if player_position.y > global_position.y + (_follow_area.size.y / 2.0):
 		global_position.y = move_toward(global_position.y, player_position.y, _SPEED)
 	elif player_position.y < global_position.y - (_follow_area.size.y / 2.0):

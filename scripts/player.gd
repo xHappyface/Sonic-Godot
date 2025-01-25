@@ -3,14 +3,13 @@ class_name Player
 
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: Sprite2D = $Sprite2D
-@onready var game_origin: Node2D = $GameOrigin
 
 const _GRAVITY: float = (96.0 / 256.0) * 60.0
 const _AIR_ACCELERATION: float = (24.0 / 256.0) * 60.0
 const _AIR_DRAG: float = (8.0 / 256.0) * 60.0
 const _TOP_Y_SPEED: float = 16.0 * 60.0
 const _JUMP_FORCE: float = 6.5 * 60.0
-const _ACCELERATION: float = (12.0 / 256.0) * 60.0
+const _ACCELERATION: float = (15.0 / 256.0) * 60.0
 const _DECELERATION: float = 0.5 * 60.0
 const _FRICTION: float = _ACCELERATION
 const _TOP_SPEED: float = 6.0 * 60.0
@@ -71,6 +70,7 @@ func _physics_process(delta: float) -> void:
 		rotation = get_floor_normal().angle() + deg_to_rad(90)
 
 func _handle_animations(move_direction: Vector2, delta: float) -> void:
+	print(velocity.x)
 	var temp_idling: float = min(_idling + delta, _PATIENCE * 60.0)
 	_idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
@@ -98,8 +98,11 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 					anim_player.play("push_l")
 			elif velocity.x != 0.0 and move_direction.y < 0.0:
 				_play_roll_animation()
-			elif sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0:
-				if abs(velocity.x) >= _TOP_SPEED:
+			elif velocity.x != 0.0 and (sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0):
+				if abs(velocity.x) > _TOP_SPEED and anim_player.current_animation != "run2":
+					anim_player.play("run2")
+				elif abs(velocity.x) >= _TOP_SPEED and \
+				  (anim_player.current_animation != "run1" or anim_player.current_animation != "run2"):
 					anim_player.play("run1")
 				elif abs(velocity.x) >= _TOP_SPEED * 0.67:
 					if anim_player.current_animation == "run0":
@@ -128,6 +131,10 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 				anim_player.queue("bored1")
 
 func _play_roll_animation() -> void:
+	if sign(velocity.x) > 0.0:
+		sprite.flip_h = false
+	elif sign(velocity.x) < 0.0:
+		sprite.flip_h = true
 	if anim_player.current_animation != "roll0" and abs(velocity.x) < _TOP_SPEED:
 		anim_player.play("roll0")
 	elif anim_player.current_animation != "roll1" and abs(velocity.x) >= _TOP_SPEED:
