@@ -20,6 +20,9 @@ const _ROLL_DECELERATION: float = (32.0 / 256.0) * 60.0
 var _control_lock: float = 0.0
 var _idling: float = 0.0
 var _is_jumping: bool = false
+var _spinrev: float = 0.0
+
+var peeling_out: float = 0.0
 
 func _ready() -> void:
 	pass
@@ -45,7 +48,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("game_space"):
 			_is_jumping = true
 			velocity.y = max(velocity.y - _JUMP_FORCE, -_TOP_Y_SPEED)
-		if real_input.x == 0.0:
+		elif real_input.x == 0.0:
 			if sign(velocity.x) > 0.0:
 				velocity.x = max(velocity.x - _FRICTION, 0.0)
 			else:
@@ -67,10 +70,10 @@ func _physics_process(delta: float) -> void:
 	_handle_animations(move_direction, delta)
 	move_and_slide()
 	if is_on_floor():
-		rotation = get_floor_normal().angle() + deg_to_rad(90)
+		var angle: float = get_floor_normal().angle() + deg_to_rad(90)
+		rotation = round(angle / (PI / 4.0)) * (PI / 4.0)
 
 func _handle_animations(move_direction: Vector2, delta: float) -> void:
-	print(velocity.x)
 	var temp_idling: float = min(_idling + delta, _PATIENCE * 60.0)
 	_idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
@@ -99,7 +102,8 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 			elif velocity.x != 0.0 and move_direction.y < 0.0:
 				_play_roll_animation()
 			elif velocity.x != 0.0 and (sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0):
-				if abs(velocity.x) > _TOP_SPEED and anim_player.current_animation != "run2":
+				if (abs(velocity.x) > _TOP_SPEED or peeling_out >= 0.125) and anim_player.current_animation != "run2":
+					print(peeling_out)
 					anim_player.play("run2")
 				elif abs(velocity.x) >= _TOP_SPEED and \
 				  (anim_player.current_animation != "run1" or anim_player.current_animation != "run2"):
