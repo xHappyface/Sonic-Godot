@@ -29,8 +29,12 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_control_lock = max(_control_lock - delta, 0.0)
+	var action_pressed: bool = Input.is_action_just_pressed("game_space")
 	var move_direction: Vector2 = Input.get_vector("game_left", "game_right", "game_down", "game_up")
 	var real_input: Vector2 = move_direction
+	var temp_spinrev: float = _spinrev
+	_spinrev = 0.0
+	temp_spinrev = clamp(temp_spinrev - ((8.0 / 256.0) * delta), 0.0, 8.0)
 	if _control_lock > 0.0:
 		move_direction.x = 0.0
 	if move_direction.x != 0.0:
@@ -45,9 +49,22 @@ func _physics_process(delta: float) -> void:
 			velocity.x -= move_direction.x * _AIR_DRAG * delta
 	else:
 		_is_jumping = false
-		if Input.is_action_just_pressed("game_space"):
+		if velocity.x == 0.0 and move_direction.y < 0.0:
+			_spinrev = temp_spinrev
+		if temp_spinrev > 0.0 and move_direction.y >= 0.0:
+			var launch_speed = 8.0 + (_spinrev / 2.0)
+			if not sprite.flip_h:
+				velocity.x = launch_speed * 60.0
+			else:
+				velocity.x = -launch_speed * 60.0
+			_spinrev = 0.0
+		elif (action_pressed and real_input.y >= 0.0 and velocity.x == 0.0) or \
+		  (action_pressed and velocity.x != 0.0):
 			_is_jumping = true
 			velocity.y = max(velocity.y - _JUMP_FORCE, -_TOP_Y_SPEED)
+		if action_pressed and velocity.x == 0.0:
+			_spinrev = min(temp_spinrev + 2.0, 8.0)
+			print(_spinrev)
 		elif real_input.x == 0.0:
 			if sign(velocity.x) > 0.0:
 				velocity.x = max(velocity.x - _FRICTION, 0.0)
@@ -55,11 +72,11 @@ func _physics_process(delta: float) -> void:
 				velocity.x = min(velocity.x + _FRICTION, 0.0)
 		else:
 			if move_direction.y < 0.0:
-				if velocity.x > 0.0 and sign(move_direction.x) != sign(velocity.x):
+				if velocity.x > 0.0 and sign(real_input.x) != sign(velocity.x):
 					velocity.x = max(velocity.x - _ROLL_DECELERATION, 0.0)
-				elif velocity.x < 0.0 and sign(move_direction.x) != sign(velocity.x):
+				elif velocity.x < 0.0 and sign(real_input.x) != sign(velocity.x):
 					velocity.x = min(velocity.x + _ROLL_DECELERATION, 0.0)
-				if velocity.x > 0.0:
+				elif velocity.x > 0.0:
 					velocity.x = max(velocity.x - _ROLL_FRICTION, 0.0)
 				elif velocity.x < 0.0:
 					velocity.x = min(velocity.x + _ROLL_FRICTION, 0.0)
@@ -67,13 +84,13 @@ func _physics_process(delta: float) -> void:
 				velocity.x = clamp(velocity.x + (move_direction.x * _ACCELERATION), -_TOP_SPEED, _TOP_SPEED)
 			else:
 				velocity.x -= sign(velocity.x) * _DECELERATION
-	_handle_animations(move_direction, delta)
+	_handle_animations(delta, move_direction)
 	move_and_slide()
 	if is_on_floor():
 		var angle: float = get_floor_normal().angle() + deg_to_rad(90)
 		rotation = round(angle / (PI / 4.0)) * (PI / 4.0)
 
-func _handle_animations(move_direction: Vector2, delta: float) -> void:
+func _handle_animations(delta: float, move_direction: Vector2) -> void:
 	var temp_idling: float = min(_idling + delta, _PATIENCE * 60.0)
 	_idling = 0.0
 	if (sign(move_direction.x) > 0.0 and sprite.flip_h) \
@@ -102,8 +119,7 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 			elif velocity.x != 0.0 and move_direction.y < 0.0:
 				_play_roll_animation()
 			elif velocity.x != 0.0 and (sign(move_direction.x) == sign(velocity.x) or move_direction.x == 0.0):
-				if (abs(velocity.x) > _TOP_SPEED or peeling_out >= 0.125) and anim_player.current_animation != "run2":
-					print(peeling_out)
+				if (abs(velocity.x) > _TOP_SPEED or peeling_out >= 0.1) and anim_player.current_animation != "run2":
 					anim_player.play("run2")
 				elif abs(velocity.x) >= _TOP_SPEED and \
 				  (anim_player.current_animation != "run1" or anim_player.current_animation != "run2"):
@@ -121,8 +137,12 @@ func _handle_animations(move_direction: Vector2, delta: float) -> void:
 				anim_player.play("brake")
 		elif is_on_floor() and move_direction.y != 0.0:
 			if move_direction.y > 0.0:
-				anim_player.play("look_up")
-			else:
+				if anim_player.current_animation != "look_up":
+					anim_player.play("look_up")
+			elif _spinrev > 0.0:
+				if anim_player.current_animation != "roll1":
+					anim_player.play("roll1")
+			elif anim_player.current_animation != "look_down":
 				anim_player.play("look_down")
 		elif anim_player.current_animation != "idle" and temp_idling < _PATIENCE:
 			_idling = temp_idling

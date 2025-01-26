@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cnocq7krbchq4"
+path="res://.godot/imported/Sonic_Brake.wav-ca9f877caa127acf9b03cd5a354894c8.sample"
+
+[deps]
+
+source_file="res://assets/sounds/sound effects/Sonic_Brake.wav"
+dest_files=["res://.godot/imported/Sonic_Brake.wav-ca9f877caa127acf9b03cd5a354894c8.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

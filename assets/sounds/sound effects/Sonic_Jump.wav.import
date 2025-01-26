@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dkq3v0mhwbisy"
+path="res://.godot/imported/Sonic_Jump.wav-dfd2d527c5ee2c103eb685b5eecb42a6.sample"
+
+[deps]
+
+source_file="res://assets/sounds/sound effects/Sonic_Jump.wav"
+dest_files=["res://.godot/imported/Sonic_Jump.wav-dfd2d527c5ee2c103eb685b5eecb42a6.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0
