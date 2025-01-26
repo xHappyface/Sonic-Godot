@@ -57,7 +57,7 @@ func _physics_process(delta: float) -> void:
 			velocity.x -= move_direction.x * _AIR_DRAG * delta
 	else:
 		_is_jumping = false
-		if _is_spinning_out and abs(velocity.x) <= 2.0 * 60.0:
+		if _is_spinning_out and (abs(velocity.x) <= 3.0 * 60.0 or move_direction.y > 0.0):
 			_is_spinning_out = false
 		if velocity.x == 0.0 and move_direction.y < 0.0:
 			_spinrev = temp_spinrev
@@ -76,7 +76,7 @@ func _physics_process(delta: float) -> void:
 			if audio_player.stream != _sfx_jump:
 				audio_player.set_stream(_sfx_jump)
 			audio_player.play()
-		if action_pressed and velocity.x == 0.0:
+		if action_pressed and velocity.x == 0.0 and move_direction.y < 0.0:
 			_spinrev = min(temp_spinrev + 2.0, 8.0)
 			print(_spinrev)
 			if audio_player.stream != _sfx_charge:
