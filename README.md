@@ -1,2 +1,3 @@
 # Sonic-Godot
 This is a new Sonic The Hedgehog framework for Godot aimed at modernizing the Sonic 1, Sonic 2, and Sonic CD game mechanics whilst remaining faithful to them.
+![A preview image of the Sonic: Godot framework. Sonic is seen bored in the middle of the test level. The game and UI resemble the classic Sonic games from the Sega Genesis and Sega CD.](https://github.com/xHappyface/Sonic-Godot/blob/main/preview/sonic_godot_001.png)
