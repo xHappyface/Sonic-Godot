@@ -5,9 +5,11 @@ class_name Player
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
 
-@onready var _sfx_jump: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_Jump.wav")
-@onready var _sfx_brake: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_Brake.wav")
-@onready var _sfx_charge: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_Charge.wav")
+@onready var _sfx_jump: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_CD_Jump.wav")
+@onready var _sfx_brake: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_CD_Brake.wav")
+@onready var _sfx_charge: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_CD_Charge.wav")
+@onready var _sfx_release: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_CD_Release.wav")
+@onready var _sfx_outta_here: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_Outta_Here.wav")
 
 const _GRAVITY: float = (96.0 / 256.0) * 60.0
 const _AIR_ACCELERATION: float = (24.0 / 256.0) * 60.0
@@ -29,12 +31,23 @@ var _spinrev: float = 0.0
 var _audio_buffer: float = 0.0
 var _is_spinning_out: bool = false
 
+var active: bool = true
+var game_over: bool = false
 var peeling_out: float = 0.0
 
 func _ready() -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
+	if (not active) or game_over:
+		return
+	if _idling >= _PATIENCE * 60.0:
+		active = false
+		game_over = true
+		anim_player.play("outta_here")
+		audio_player.stream = _sfx_outta_here
+		audio_player.play()
+		return
 	_control_lock = max(_control_lock - delta, 0.0)
 	var action_pressed: bool = Input.is_action_just_pressed("game_action")
 	var move_direction: Vector2 = Input.get_vector("game_left", "game_right", "game_down", "game_up")
@@ -69,6 +82,9 @@ func _physics_process(delta: float) -> void:
 				velocity.x = -launch_speed * 60.0
 			_is_spinning_out = true
 			_spinrev = 0.0
+			if audio_player.stream != _sfx_release:
+				audio_player.stream = _sfx_release
+			audio_player.play()
 		elif (action_pressed and real_input.y >= 0.0 and velocity.x == 0.0) or \
 		  (action_pressed and velocity.x != 0.0):
 			_is_jumping = true
@@ -82,7 +98,7 @@ func _physics_process(delta: float) -> void:
 			if audio_player.stream != _sfx_charge:
 				audio_player.set_stream(_sfx_charge)
 			if _audio_buffer <= 0.0 or not audio_player.playing:
-				_audio_buffer = 0.175
+				_audio_buffer = 0.178
 				audio_player.play()
 		elif real_input.x == 0.0:
 			if sign(velocity.x) > 0.0:

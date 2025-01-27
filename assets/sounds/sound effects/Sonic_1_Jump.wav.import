@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://dkq3v0mhwbisy"
-path="res://.godot/imported/Sonic_Jump.wav-dfd2d527c5ee2c103eb685b5eecb42a6.sample"
+path="res://.godot/imported/Sonic_1_Jump.wav-6b12ce82b82a91ee3fc1fac74b6b5f37.sample"
 
 [deps]
 
-source_file="res://assets/sounds/sound effects/Sonic_Jump.wav"
-dest_files=["res://.godot/imported/Sonic_Jump.wav-dfd2d527c5ee2c103eb685b5eecb42a6.sample"]
+source_file="res://assets/sounds/sound effects/Sonic_1_Jump.wav"
+dest_files=["res://.godot/imported/Sonic_1_Jump.wav-6b12ce82b82a91ee3fc1fac74b6b5f37.sample"]
 
 [params]
 

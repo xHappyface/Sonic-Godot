@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://cnocq7krbchq4"
-path="res://.godot/imported/Sonic_Brake.wav-ca9f877caa127acf9b03cd5a354894c8.sample"
+path="res://.godot/imported/Sonic_1_Brake.wav-23b228bacc38832ec43e561858fd3022.sample"
 
 [deps]
 
-source_file="res://assets/sounds/sound effects/Sonic_Brake.wav"
-dest_files=["res://.godot/imported/Sonic_Brake.wav-ca9f877caa127acf9b03cd5a354894c8.sample"]
+source_file="res://assets/sounds/sound effects/Sonic_1_Brake.wav"
+dest_files=["res://.godot/imported/Sonic_1_Brake.wav-23b228bacc38832ec43e561858fd3022.sample"]
 
 [params]
 

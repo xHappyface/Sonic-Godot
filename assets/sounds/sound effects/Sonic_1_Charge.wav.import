@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://cirtokl2x6smy"
-path="res://.godot/imported/Sonic_Charge.wav-0a4600843affc11b6a7f6c1dcf812064.sample"
+path="res://.godot/imported/Sonic_1_Charge.wav-8332c0f6845a67784447844dd3cf322c.sample"
 
 [deps]
 
-source_file="res://assets/sounds/sound effects/Sonic_Charge.wav"
-dest_files=["res://.godot/imported/Sonic_Charge.wav-0a4600843affc11b6a7f6c1dcf812064.sample"]
+source_file="res://assets/sounds/sound effects/Sonic_1_Charge.wav"
+dest_files=["res://.godot/imported/Sonic_1_Charge.wav-8332c0f6845a67784447844dd3cf322c.sample"]
 
 [params]
 

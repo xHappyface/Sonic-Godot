@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://60c6satf0ef0"
+path="res://.godot/imported/Sonic_CD_Charge.wav-d8dbd05d367e93bec73668c4502437ff.sample"
+
+[deps]
+
+source_file="res://assets/sounds/sound effects/Sonic_CD_Charge.wav"
+dest_files=["res://.godot/imported/Sonic_CD_Charge.wav-d8dbd05d367e93bec73668c4502437ff.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

@@ -1,9 +1,19 @@
-[gd_scene load_steps=8 format=4 uid="uid://pgpaxv0wqxa2"]
+[gd_scene load_steps=18 format=4 uid="uid://pgpaxv0wqxa2"]
 
+[ext_resource type="Script" path="res://scripts/models/level.gd" id="1_ikpgy"]
 [ext_resource type="PackedScene" uid="uid://bbxs84qxp8jfl" path="res://scenes/player.tscn" id="1_w5r1i"]
 [ext_resource type="AudioStream" uid="uid://ci4oemcvtxiwn" path="res://assets/sounds/music/smbcd_speedrun_titlescreen.mp3" id="3_5uxdc"]
 [ext_resource type="Texture2D" uid="uid://b6o23xntyeap1" path="res://assets/tilesets/Sprite-0001_I_love_you_mr_PK_.png" id="3_msicc"]
+[ext_resource type="Texture2D" uid="uid://d2hcbqveyeksm" path="res://assets/backgrounds/Bg_layer_1_.png" id="3_nqaed"]
 [ext_resource type="Script" path="res://scripts/camera.gd" id="4_7o7oi"]
+[ext_resource type="Texture2D" uid="uid://djw764n5rv2tn" path="res://assets/backgrounds/Bg_layer_2_.png" id="4_hcpll"]
+[ext_resource type="Texture2D" uid="uid://dktc8ppjtpiw" path="res://assets/backgrounds/Bg_layer_3_.png" id="5_t0lmq"]
+[ext_resource type="Texture2D" uid="uid://cebjl12yacksx" path="res://assets/backgrounds/Bg_layer_4_.png" id="6_f67q7"]
+[ext_resource type="Texture2D" uid="uid://6wmfh8o6ff32" path="res://assets/backgrounds/Bg_layer_5_.png" id="7_43ipt"]
+[ext_resource type="Texture2D" uid="uid://b5jj3gpfltdf4" path="res://assets/backgrounds/Bg_layer_6_.png" id="8_6q6fk"]
+[ext_resource type="Texture2D" uid="uid://bwtmw1wc5wqau" path="res://assets/backgrounds/Bg_layer_7_.png" id="9_xhgoh"]
+[ext_resource type="Texture2D" uid="uid://csv7yjowvavm7" path="res://assets/backgrounds/Bg_layer_8_.png" id="10_m05b6"]
+[ext_resource type="Texture2D" uid="uid://d01af53xnmmku" path="res://assets/backgrounds/Bg_layer_9_.png" id="11_uvnxq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gofj7"]
 size = Vector2(16, 64)
@@ -1852,9 +1862,10 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_q8wi7")
 
 [node name="Level0" type="Node2D"]
+script = ExtResource("1_ikpgy")
 
 [node name="SpawnPoint" type="Node2D" parent="."]
-position = Vector2(320, -96)
+position = Vector2(160, 184)
 
 [node name="Camera2D" type="Camera2D" parent="SpawnPoint"]
 script = ExtResource("4_7o7oi")
@@ -1863,13 +1874,90 @@ script = ExtResource("4_7o7oi")
 position = Vector2(-8, 0)
 shape = SubResource("RectangleShape2D_gofj7")
 
+[node name="ParallaxBackground" type="ParallaxBackground" parent="SpawnPoint/Camera2D"]
+offset = Vector2(0, -16)
+transform = Transform2D(1, 0, 0, 1, 0, -16)
+follow_viewport_scale = 2.0
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.97, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer"]
+texture = ExtResource("3_nqaed")
+centered = false
+
+[node name="ParallaxLayer2" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.87, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer2"]
+texture = ExtResource("4_hcpll")
+centered = false
+
+[node name="ParallaxLayer3" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.67, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer3"]
+texture = ExtResource("5_t0lmq")
+centered = false
+
+[node name="ParallaxLayer4" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.35, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer4"]
+texture = ExtResource("6_f67q7")
+centered = false
+
+[node name="ParallaxLayer5" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.125, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer5"]
+texture = ExtResource("7_43ipt")
+centered = false
+
+[node name="ParallaxLayer6" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.15, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer6"]
+texture = ExtResource("8_6q6fk")
+centered = false
+
+[node name="ParallaxLayer7" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.175, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer7"]
+texture = ExtResource("9_xhgoh")
+centered = false
+
+[node name="ParallaxLayer8" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.2, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer8"]
+texture = ExtResource("10_m05b6")
+centered = false
+
+[node name="ParallaxLayer9" type="ParallaxLayer" parent="SpawnPoint/Camera2D/ParallaxBackground"]
+motion_scale = Vector2(0.25, 1)
+motion_mirroring = Vector2(512, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="SpawnPoint/Camera2D/ParallaxBackground/ParallaxLayer9"]
+texture = ExtResource("11_uvnxq")
+centered = false
+
 [node name="Player" parent="SpawnPoint" instance=ExtResource("1_w5r1i")]
 z_index = 10
 position = Vector2(0, 24)
 
 [node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_5uxdc")
-volume_db = -12.0
+volume_db = -6.0
 autoplay = true
 parameters/looping = true
 
