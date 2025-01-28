@@ -23,6 +23,7 @@ const _DECELERATION: float = 0.5 * 60.0
 const _FRICTION: float = _ACCELERATION
 const _TOP_SPEED: float = 6.0 * 60.0
 const _PATIENCE: float = 3.0
+const _MAX_PATIENCE: float = _PATIENCE * 60.0
 const _ROLL_FRICTION: float = _ACCELERATION / 2.0
 const _ROLL_DECELERATION: float = (32.0 / 256.0) * 60.0
 
@@ -42,7 +43,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if (not active):
 		return
-	if _idling >= _PATIENCE * 3.0:
+	if _idling >= _MAX_PATIENCE:
 		active = false
 		anim_player.play("outta_here")
 		audio_player.stream = _sfx_outta_here
