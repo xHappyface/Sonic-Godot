@@ -11,6 +11,8 @@ class_name Player
 @onready var _sfx_release: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_CD_Release.wav")
 @onready var _sfx_outta_here: AudioStreamWAV = preload("res://assets/sounds/sound effects/Sonic_Outta_Here.wav")
 
+signal game_over
+
 const _GRAVITY: float = (96.0 / 256.0) * 60.0
 const _AIR_ACCELERATION: float = (24.0 / 256.0) * 60.0
 const _AIR_DRAG: float = (8.0 / 256.0) * 60.0
@@ -32,21 +34,20 @@ var _audio_buffer: float = 0.0
 var _is_spinning_out: bool = false
 
 var active: bool = true
-var game_over: bool = false
 var peeling_out: float = 0.0
 
 func _ready() -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
-	if (not active) or game_over:
+	if (not active):
 		return
-	if _idling >= _PATIENCE * 60.0:
+	if _idling >= _PATIENCE * 3.0:
 		active = false
-		game_over = true
 		anim_player.play("outta_here")
 		audio_player.stream = _sfx_outta_here
 		audio_player.play()
+		game_over.emit()
 		return
 	_control_lock = max(_control_lock - delta, 0.0)
 	var action_pressed: bool = Input.is_action_just_pressed("game_action")
@@ -62,9 +63,9 @@ func _physics_process(delta: float) -> void:
 		move_direction.y = 0.0
 	if not is_on_floor():
 		velocity.y = min((velocity.y + _GRAVITY), _TOP_Y_SPEED)
-		if _is_jumping and not action_pressed:
+		if _is_jumping and not Input.is_action_pressed("game_action"):
 			if velocity.y < 0.0:
-				velocity.y = max(velocity.y, -4.0 * 60.0)
+				velocity.y = max(velocity.y, -4.0 * 60.0, 0.0)
 		velocity.x = velocity.x + (move_direction.x * _AIR_ACCELERATION)
 		if velocity.y == clamp(velocity.y, -4.0 * 60, 0.0):
 			velocity.x -= move_direction.x * _AIR_DRAG * delta
