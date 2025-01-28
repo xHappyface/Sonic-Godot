@@ -1,17 +1,11 @@
-[gd_scene load_steps=16 format=3 uid="uid://b2cb3xhi7pmuc"]
+[gd_scene load_steps=13 format=3 uid="uid://b2cb3xhi7pmuc"]
 
 [ext_resource type="Script" path="res://scripts/models/level_manager.gd" id="1_6y5rj"]
-[ext_resource type="Script" path="res://scripts/models/game.gd" id="1_475q1"]
 [ext_resource type="Script" path="res://scripts/models/overlay.gd" id="2_b0q4q"]
 [ext_resource type="FontFile" uid="uid://ixtywg4cu03n" path="res://assets/fonts/sonic-3-knuckles-hud-font.ttf" id="4_la1pg"]
 [ext_resource type="Texture2D" uid="uid://bchmnmnq5ep5k" path="res://assets/characters/sonic/sonic_lives_icon.png" id="5_1my5d"]
 [ext_resource type="FontFile" uid="uid://c7onc1ss0alg7" path="res://assets/fonts/sonic-1-life-hud.ttf" id="5_hlukl"]
 [ext_resource type="FontFile" uid="uid://dxv35e0fhnnc7" path="res://assets/fonts/sonic-1-2-game-over.ttf" id="5_pyikb"]
-[ext_resource type="Texture2D" uid="uid://ddj1p3catqlxi" path="res://assets/sonic_godot_title_screen.png" id="7_c6xu3"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_nkv0l"]
-font = ExtResource("4_la1pg")
-font_size = 14
 
 [sub_resource type="LabelSettings" id="LabelSettings_3lvmr"]
 font = ExtResource("5_hlukl")
@@ -53,56 +47,6 @@ _data = {
 }
 
 [node name="Game" type="Node"]
-script = ExtResource("1_475q1")
-
-[node name="MainMenu" type="Control" parent="."]
-z_index = 50
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ColorRect" type="ColorRect" parent="MainMenu"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 1)
-
-[node name="TitleScreen" type="TextureRect" parent="MainMenu"]
-modulate = Color(1, 1, 1, 0)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("7_c6xu3")
-expand_mode = 3
-stretch_mode = 5
-
-[node name="PressStart" type="Label" parent="MainMenu"]
-modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -23.0
-offset_right = 20.0
-grow_horizontal = 2
-grow_vertical = 0
-text = "Press Start"
-label_settings = SubResource("LabelSettings_nkv0l")
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="LevelManager" type="Node" parent="."]
 script = ExtResource("1_6y5rj")
@@ -112,7 +56,6 @@ wait_time = 600.0
 one_shot = true
 
 [node name="Overlay" type="Control" parent="LevelManager"]
-visible = false
 z_index = 20
 custom_minimum_size = Vector2(320, 224)
 layout_mode = 3
@@ -248,15 +191,3 @@ label_settings = SubResource("LabelSettings_ictwc")
 libraries = {
 "": SubResource("AnimationLibrary_d05f5")
 }
-
-[node name="GameViewport" type="SubViewportContainer" parent="LevelManager"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="GameView" type="SubViewport" parent="LevelManager/GameViewport"]
-handle_input_locally = false
-render_target_update_mode = 0

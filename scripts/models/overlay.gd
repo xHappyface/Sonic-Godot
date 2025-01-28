@@ -26,7 +26,7 @@ func set_rings(amount: int) -> void:
 
 func set_lives(amount: int) -> void:
 	amount = clamp(amount, 0, 99)
-	_lives.text = "x  %2d" % [amount]
+	_lives.text = "×  %2d" % [amount]
 	queue_redraw()
 
 func set_time(t: float) -> void:
