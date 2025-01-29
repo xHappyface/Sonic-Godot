@@ -62,8 +62,11 @@ func _physics_process(delta: float) -> void:
 		move_direction.x = 0.0
 	if move_direction.x != 0.0:
 		move_direction.y = 0.0
-	if not is_on_floor():
+	if (not is_on_floor()) or \
+	  (rad_to_deg(get_floor_normal().angle()) + 90.0 > 45.0 or \
+	  rad_to_deg(get_floor_normal().angle()) + 90.0 < -45.0):
 		velocity.y = min((velocity.y + _GRAVITY), _TOP_Y_SPEED)
+	if not is_on_floor():
 		if _is_jumping and not Input.is_action_pressed("game_action"):
 			if velocity.y < 0.0:
 				velocity.y = max(velocity.y, -4.0 * 60.0, 0.0)
@@ -131,9 +134,11 @@ func _physics_process(delta: float) -> void:
 						audio_player.play()
 	_handle_animations(delta, move_direction)
 	move_and_slide()
-	if is_on_floor():
-		var angle: float = get_floor_normal().angle() + deg_to_rad(90)
-		rotation = round(angle / (PI / 4.0)) * (PI / 4.0)
+	var angle: float = get_floor_normal().angle() + deg_to_rad(90.0)
+	if not is_on_floor():
+		angle -= deg_to_rad(90.0)
+	var snapped_angle: float = round(angle / (PI / 4.0)) * (PI / 4.0)
+	rotation = round(angle / (PI / 4.0)) * (PI / 4.0)
 
 func _handle_animations(delta: float, move_direction: Vector2) -> void:
 	var temp_idling: float = min(_idling + delta, _PATIENCE * 60.0)
