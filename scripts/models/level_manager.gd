@@ -10,6 +10,7 @@ class_name LevelManager
 var _level: Level = null
 var _player: Player = null
 
+const _FLASH_TIME_LEFT: float = 60.0
 const _STARTING_RINGS: int = 0
 const _STARTING_LIVES: int = 3
 
@@ -25,7 +26,19 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not _is_level_running:
 		return
-	_overlay.set_time(_time.wait_time - _time.time_left)
+	var time_at: float = _time.wait_time - _time.time_left
+	if _time.time_left <= _FLASH_TIME_LEFT:
+		if int(time_at * 10) % 4 == 0:
+			_overlay.set_time(time_at, Color.RED)
+		elif int(time_at * 10) % 4 == 2:
+			_overlay.set_time(time_at)
+	else:
+		_overlay.set_time(time_at)
+	if rings <= 0:
+		if int(time_at * 10) % 4 == 0:
+			_overlay.set_rings(rings, Color.RED)
+		elif int(time_at * 10) % 4 == 2:
+			_overlay.set_rings(rings)
 
 func start_level(packed_level: PackedScene = default_level) -> void:
 	if (not packed_level.can_instantiate()):

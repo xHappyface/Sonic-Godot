@@ -2,6 +2,7 @@ extends Node
 
 @onready var main_menu: Control = $MainMenu
 @onready var level_manager: LevelManager = $LevelManager
+@onready var menu_audio_player: AudioStreamPlayer = $MainMenu/AudioStreamPlayer
 
 @onready var _title_screen: TextureRect = $MainMenu/TitleScreen
 @onready var _press_start: Label = $MainMenu/PressStart
@@ -31,6 +32,7 @@ func hide_main_menu() -> void:
 func show_main_menu() -> void:
 	var tween: Tween = create_tween()
 	main_menu.show()
+	menu_audio_player.play()
 	tween.tween_property(_title_screen, "modulate", Color(1.0, 1.0, 1.0, 1.0), 2.25)
 	tween.tween_property(_press_start, "modulate", Color(1.0, 1.0, 1.0, 1.0), 1.0)
 	tween.tween_callback(_toggle_title_finished)
