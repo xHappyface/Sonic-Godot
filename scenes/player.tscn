@@ -1202,3 +1202,5 @@ autoplay = "idle"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -6.0
+mix_target = 2
+max_polyphony = 6

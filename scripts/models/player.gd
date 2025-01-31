@@ -52,16 +52,18 @@ func _physics_process(delta) -> void:
 	var movement_input: Vector2 = Input.get_vector("game_left", "game_right", "game_down", "game_up", 0.35)
 	var real_velocity: Vector2 = get_real_velocity()
 	var on_floor: bool = is_on_floor()
+	var on_wall: bool = is_on_wall()
 	var floor_angle: float = rad_to_deg(get_floor_angle())
 	movement_input = round(movement_input)
 	if _audio_buffer:
 		_audio_buffer = move_toward(_audio_buffer, 0.0, delta)
 	if _is_jumping and on_floor:
 		_is_jumping = false
-	if _is_rolling and on_floor and real_velocity and abs(real_velocity.x) < _TOP_SPEED * 0.18:
+	if _is_rolling and on_floor and real_velocity and (abs(velocity.x) == 0.0 or on_wall):
 		_is_rolling = false
 	if _is_charging and movement_input.y >= 0.0:
 		_is_charging = false
+		print("charging false")
 		_spinrev = 0.0
 		_charges = 0
 	if not on_floor and velocity.y < -_TOP_SPEED * 0.25 and not Input.is_action_pressed("game_action"):
@@ -91,8 +93,11 @@ func _physics_process(delta) -> void:
 				_spinrev += 2.0
 				_spinrev = clamp(_spinrev, 0.0, 8.0)
 		print("[%s]: %f" % [Time.get_datetime_string_from_system(), 8.0 + (floor(_spinrev) / 2.0)])
-	elif not _control_lock and not _is_charging and on_floor and movement_input.y < 0.0 and abs(velocity.x) <= 0.05:
+	elif not _control_lock and not _is_charging and on_floor and movement_input.y < 0.0 and velocity.x == 0.0:
 		_is_charging = true
+		print("charging true")
+	elif not _control_lock and on_floor and velocity.x != 0.0 and movement_input.y < 0.0:
+		_is_rolling = true
 	elif not _control_lock and on_floor and Input.is_action_just_pressed("game_action"):
 		_is_jumping = true
 		velocity = real_velocity
@@ -128,45 +133,45 @@ func _physics_process(delta) -> void:
 	_handle_animation(real_velocity, on_floor, movement_input, floor_angle)
 
 func _handle_animation(real_velocity: Vector2, on_floor: bool, movement_input: Vector2, floor_angle: float) -> void:
-	if real_velocity == Vector2.ZERO and not _is_jumping and _idling > 0.0:
-		if _idling >= 3.0:
-			if anim_player.current_animation != "bored0" and anim_player.current_animation != "bored1":
-				anim_player.play("bored0")
-				anim_player.queue("bored1")
-		elif anim_player.current_animation != "idle":
-			anim_player.play("idle")
-	elif _is_jumping:
+	if _is_jumping:
 		if anim_player.current_animation != "roll0" and anim_player.current_animation != "roll1":
-			if (not _audio_buffer) and (not audio_player.playing):
-				if audio_player.stream != _sfx_jump:
-					audio_player.stream = _sfx_jump
-				audio_player.play()
-		_play_roll_animation()
-	elif not _is_jumping and velocity.x != 0.0 and \
-	  (_is_rolling or (on_floor and movement_input.y < 0.0)):
-		if not _is_rolling:
-			_is_rolling = true
-		_play_roll_animation()
-	elif movement_input.x != 0.0 and abs(velocity.x) > _TOP_SPEED * 0.25 and sign(movement_input.x) != sign(velocity.x):
+			_play_roll_animation()
+	elif _is_rolling and velocity.x < _TOP_SPEED * 0.67:
+		if anim_player.current_animation != "roll0":
+			anim_player.play("roll0")
+	elif _is_rolling and velocity.x >= _TOP_SPEED * 0.67:
+		if anim_player.current_animation != "roll1":
+			anim_player.play("roll1")
+	elif _is_charging and _charges == 8:
+		if anim_player.current_animation != "roll1":
+			anim_player.play("roll1")
+	elif _is_charging and _charges > 0:
+		if anim_player.current_animation != "roll0":
+			anim_player.play("roll0")
+	elif _is_charging:
+		if anim_player.current_animation != "look_down":
+			anim_player.play("look_down")
+	elif on_floor and velocity.x != 0.0 and abs(velocity.x) >= _TOP_SPEED * 0.1 and sign(velocity.x) != sign(movement_input.x):
 		if anim_player.current_animation != "brake":
 			anim_player.play("brake")
-			if not _audio_buffer and not audio_player.playing:
-				if audio_player.stream != _sfx_brake:
-					audio_player.stream = _sfx_brake
-				audio_player.play()
-			_audio_buffer = 4.0
-	elif real_velocity.x != 0.0:
-		if peeling_out or abs(velocity.x) > _TOP_SPEED * 1.05:
-			if anim_player.current_animation != "run2":
-				anim_player.play("run2")
-		elif (_TOP_SPEED * 1.05 > abs(velocity.x) and abs(velocity.x) > _TOP_SPEED * 0.95):
-			if anim_player.current_animation != "run1":
-				anim_player.play("run1")
-		elif abs(velocity.x) > _TOP_SPEED * 0.54:
-			if anim_player.current_animation != "run0_1":
-				anim_player.play("run0_1")
-		elif anim_player.current_animation != "run0" or anim_player.current_animation != "brake":
-				anim_player.play("run0")
+	elif on_floor and velocity.x != 0.0 and (peeling_out or abs(velocity.x) > _TOP_SPEED):
+		if anim_player.current_animation != "run2":
+			anim_player.play("run2")
+	elif on_floor and velocity.x != 0.0 and abs(velocity.x) == _TOP_SPEED:
+		if anim_player.current_animation != "run1":
+			anim_player.play("run1")
+	elif on_floor and velocity.x != 0.0 and abs(velocity.x) >= _TOP_SPEED * 0.67:
+		if anim_player.current_animation != "run0_1":
+			anim_player.play("run0_1") 
+	elif on_floor and velocity.x != 0.0 and abs(velocity.x) < _TOP_SPEED * 0.67:
+		if anim_player.current_animation != "run0":
+			anim_player.play("run0")
+	elif on_floor and not velocity and not real_velocity and movement_input.y > 0.0:
+		if anim_player.current_animation != "look_up":
+			anim_player.play("look_up")
+	elif _idling > 0.0:
+		if anim_player.current_animation != "idle":
+			anim_player.play("idle")
 	if abs(real_velocity.y) <= 60.0 * 0.01 or rad_to_deg(floor_angle) < 45.0:
 		rotation_degrees = 0.0
 	else:
