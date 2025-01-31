@@ -13,22 +13,22 @@ class_name Player
 
 signal game_over
 
-const _GRAVITY: float = (104.0 / 256.0) * 60.0
-const _AIR_ACCELERATION: float = (24.0 / 256.0) * 60.0
-const _AIR_DRAG: float = (8.0 / 256.0) * 60.0
-const _TOP_Y_SPEED: float = 16.0 * 60.0
+const _GRAVITY: float = (56.0 / 256.0) * 120.0
+const _AIR_ACCELERATION: float = (24.0 / 256.0) * 120.0
+const _AIR_DRAG: float = (8.0 / 256.0) * 120.0
+const _TOP_Y_SPEED: float = 16.0 * 120.0
 const _JUMP_FORCE: float = 6.5 * 60.0
-const _ACCELERATION: float = (25.0 / 256.0) * 60.0
-const _DECELERATION: float = 0.5 * 60.0
+const _ACCELERATION: float = (12.0 / 256.0) * 120.0
+const _DECELERATION: float = 0.5 * 120.0
 const _FRICTION: float = _ACCELERATION
 const _TOP_SPEED: float = 6.0 * 60.0
 const _PATIENCE: float = 3.0
 const _MAX_PATIENCE: float = _PATIENCE * 60.0
 const _ROLL_FRICTION: float = _ACCELERATION / 2.0
-const _ROLL_DECELERATION: float = (32.0 / 256.0) * 60.0
-const _SLOPE_FACTOR: float = (32.0 / 256.0) * 60.0
-const _SLOPE_FACTOR_ROLLUP: float = (20.0 / 256.0) * 60.0
-const _SLOPE_FACTOR_ROLLDOWN: float = _SLOPE_FACTOR_ROLLUP * 4.0
+const _ROLL_DECELERATION: float = (32.0 / 256.0) * 120.0
+const _SLOPE_FACTOR: float = (32.0 / 256.0) * 120.0
+const _SLOPE_FACTOR_ROLLUP: float = (20.0 / 256.0) * 120.0
+const _SLOPE_FACTOR_ROLLDOWN: float = _SLOPE_FACTOR_ROLLUP * 2.0
 
 var _control_lock: float = 0.0
 var _idling: float = 0.0
@@ -54,6 +54,7 @@ func _physics_process(delta) -> void:
 	var on_floor: bool = is_on_floor()
 	var on_wall: bool = is_on_wall()
 	var floor_angle: float = rad_to_deg(get_floor_angle())
+	var wall_normals: Vector2 = Vector2.ZERO
 	movement_input = round(movement_input)
 	if _audio_buffer:
 		_audio_buffer = move_toward(_audio_buffer, 0.0, delta)
@@ -66,23 +67,28 @@ func _physics_process(delta) -> void:
 		print("charging false")
 		_spinrev = 0.0
 		_charges = 0
+	if on_wall:
+		wall_normals = get_wall_normal()
 	if not on_floor and velocity.y < -_TOP_SPEED * 0.25 and not Input.is_action_pressed("game_action"):
 		velocity.y = -_TOP_SPEED * 0.25
 	if not on_floor and real_velocity.y < 0.0 and real_velocity.y > -4.0:
 		velocity.x = move_toward(velocity.x, 0.0, floor(abs(velocity.x) * 8.0) / 256.0)
 	if not on_floor or (floor_angle > 45.0 and velocity.x < _TOP_SPEED * 0.33):
 		velocity.y = move_toward(velocity.y, _TOP_Y_SPEED, _GRAVITY)
-	elif on_floor and velocity.x != 0.0 and floor_angle != 0.0:
+	elif on_floor and velocity.x != 0.0 and floor_angle != 0.0 and movement_input.x != 0.0:
 		var floor_normals: Vector2 = get_floor_normal()
+		print(floor_normals)
 		if not _is_rolling:
-			velocity.x += _SLOPE_FACTOR * floor_normals.x
+			velocity.x += _SLOPE_FACTOR * sign(floor_normals.x) * abs(floor_normals.x)
 		elif _is_rolling and sign(velocity.x) != sign(floor_normals.x):
-			velocity.x += _SLOPE_FACTOR_ROLLUP * -floor_normals.x
+			velocity.x += _SLOPE_FACTOR_ROLLUP * sign(floor_normals.x) * abs(floor_normals.x)
 		elif _is_rolling and sign(velocity.x) == sign(floor_normals.x):
-			velocity.x += _SLOPE_FACTOR_ROLLDOWN * floor_normals.x
+			velocity.x += _SLOPE_FACTOR_ROLLDOWN * sign(floor_normals.x) * abs(floor_normals.x)
 	elif movement_input == Vector2.ZERO and real_velocity == Vector2.ZERO:
 		_idling += delta
-	if not _control_lock and not on_floor and movement_input.x != 0.0:
+		if _idling >= _MAX_PATIENCE:
+			game_over.emit()
+	if not _control_lock and not on_floor and movement_input.x != 0.0 and not on_wall:
 		velocity.x = move_toward(velocity.x, sign(movement_input.x) * _TOP_SPEED, _AIR_ACCELERATION)
 	elif not _control_lock and _is_charging and on_floor and movement_input.y < 0.0:
 		_spinrev = move_toward(_spinrev, 0.0, floor(_charges / 0.125) / 256.0)
@@ -108,17 +114,21 @@ func _physics_process(delta) -> void:
 			sprite.flip_h = false
 	elif not _control_lock and not _is_jumping and _is_rolling and on_floor and real_velocity.x != 0.0:
 		velocity.x = move_toward(velocity.x, 0.0, _ROLL_FRICTION)
+		if on_wall:
+			velocity.x = 0.0
 		if sign(movement_input.x) != 0.0 and sign(movement_input.x) != sign(velocity.x):
 			velocity.x = move_toward(velocity.x, 0.0, _ROLL_DECELERATION)
-	elif not _control_lock and on_floor and velocity.x != 0.0 and movement_input.x == 0.0:
+	elif not _control_lock and on_floor and velocity.x != 0.0 and movement_input.x == 0.0 and not on_wall:
 		velocity.x = move_toward(velocity.x, 0.0, _FRICTION)
 	elif not _control_lock and on_floor and movement_input.x != 0.0:
 		if velocity.x != 0.0 and sign(movement_input.x) != sign(velocity.x):
-			if _DECELERATION > abs(velocity.x):
+			if _DECELERATION > abs(velocity.x) or on_wall:
 				velocity.x = -sign(velocity.x) * _DECELERATION
 			else:
 				velocity.x = move_toward(velocity.x, 0.0, _DECELERATION)
 		else:
+			if on_wall and sign(wall_normals.x) != velocity.x:
+				velocity.x = 0.0
 			velocity.x = move_toward(velocity.x, sign(movement_input.x) * _TOP_SPEED, _ACCELERATION)
 		if velocity.x < 0.0 and not sprite.flip_h:
 			sprite.flip_h = true
@@ -130,9 +140,10 @@ func _physics_process(delta) -> void:
 	floor_angle = get_floor_angle()
 	if real_velocity != Vector2.ZERO:
 		_idling = 0.0
-	_handle_animation(real_velocity, on_floor, movement_input, floor_angle)
+	_handle_animation(real_velocity, on_floor, movement_input, floor_angle, on_wall, wall_normals)
 
-func _handle_animation(real_velocity: Vector2, on_floor: bool, movement_input: Vector2, floor_angle: float) -> void:
+func _handle_animation(real_velocity: Vector2, on_floor: bool, movement_input: Vector2, \
+  floor_angle: float, on_wall: bool, wall_normals: Vector2) -> void:
 	if _is_jumping:
 		if anim_player.current_animation != "roll0" and anim_player.current_animation != "roll1":
 			_play_roll_animation()
@@ -151,7 +162,13 @@ func _handle_animation(real_velocity: Vector2, on_floor: bool, movement_input: V
 	elif _is_charging:
 		if anim_player.current_animation != "look_down":
 			anim_player.play("look_down")
-	elif on_floor and velocity.x != 0.0 and abs(velocity.x) >= _TOP_SPEED * 0.1 and sign(velocity.x) != sign(movement_input.x):
+	elif on_floor and on_wall and sign(movement_input.x) != sign(wall_normals.x):
+		if sign(movement_input.x) > 0.0 and anim_player.current_animation != "push_r":
+			anim_player.play("push_r")
+		elif sign(movement_input.x) < 0.0 and anim_player.current_animation != "push_l":
+			anim_player.play("push_l")
+	elif on_floor and velocity.x != 0.0 and abs(velocity.x) >= _TOP_SPEED * 0.1 \
+	  and sign(movement_input.x) != 0.0 and sign(velocity.x) != sign(movement_input.x):
 		if anim_player.current_animation != "brake":
 			anim_player.play("brake")
 	elif on_floor and velocity.x != 0.0 and (peeling_out or abs(velocity.x) > _TOP_SPEED):
@@ -169,6 +186,10 @@ func _handle_animation(real_velocity: Vector2, on_floor: bool, movement_input: V
 	elif on_floor and not velocity and not real_velocity and movement_input.y > 0.0:
 		if anim_player.current_animation != "look_up":
 			anim_player.play("look_up")
+	elif _idling > _PATIENCE:
+		if anim_player.current_animation != "bored0" and anim_player.current_animation != "bored1":
+			anim_player.play("bored0")
+			anim_player.queue("bored1")
 	elif _idling > 0.0:
 		if anim_player.current_animation != "idle":
 			anim_player.play("idle")
